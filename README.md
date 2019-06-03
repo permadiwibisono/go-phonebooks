@@ -32,10 +32,11 @@ PORT = 5000
 
 ```
 go run main.go
+// your app will be served at http://localhost:${PORT}
 ```
 
 ## For build
 
 ```
-go build -o build/main main.go
+go build -o build/main main.go && build/main
 ```
