@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"os"
 
+	middlewares "go-phonebooks/middlewares"
 	res "go-phonebooks/utils"
 	_ "go-phonebooks/utils/env"
 
@@ -20,6 +21,7 @@ func HomeRouteHandler(w http.ResponseWriter, r *http.Request) {
 func main() {
 	router := mux.NewRouter()
 	router.HandleFunc("/", HomeRouteHandler)
+	router.Use(middlewares.JwtAuthMiddleware)
 	port := os.Getenv("PORT")
 	if port == "" {
 		port = "8000"
