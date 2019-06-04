@@ -6,6 +6,7 @@ import (
 	"os"
 
 	middlewares "go-phonebooks/middlewares"
+	"go-phonebooks/models"
 	res "go-phonebooks/utils"
 	_ "go-phonebooks/utils/env"
 
@@ -14,8 +15,18 @@ import (
 
 func HomeRouteHandler(w http.ResponseWriter, r *http.Request) {
 	msg := "Hello world!!!"
-	res.Respond(w, res.Message(200, msg))
-	fmt.Println(msg)
+	user := &models.User{
+		Email: "mbapewe@gmail.com",
+	}
+	err, isValid := user.Validate()
+	fmt.Println(err)
+	fmt.Println(isValid)
+	if err != nil {
+		res.RespondError(w, 422, "Invalid request!", err)
+		return
+	}
+	res.Respond(w, 200, res.Message(200, msg))
+	// fmt.Println(msg)
 }
 
 func main() {
