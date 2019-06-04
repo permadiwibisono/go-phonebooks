@@ -30,7 +30,8 @@ func init() {
 	}
 
 	db = conn
-	// db.Debug().AutoMigrate(&Account{}, &Contact{}) //Database migration
+	db.SingularTable(true)
+	db.Debug().AutoMigrate(&User{}, &Contact{}) //Database migration
 }
 
 func getDB() *gorm.DB {
