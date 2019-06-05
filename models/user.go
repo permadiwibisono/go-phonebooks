@@ -3,6 +3,8 @@ package models
 import (
 	"strings"
 
+	h "go-phonebooks/utils/hash"
+
 	jwt "github.com/dgrijalva/jwt-go"
 	"github.com/jinzhu/gorm"
 )
@@ -15,8 +17,8 @@ type Token struct {
 type User struct {
 	gorm.Model
 	Email    string `json:"email"`
-	Password string `json:"password" gorm:"column:_password"`
-	Token    string `json:"_token" sql:"-"`
+	Password string `json:"-" gorm:"column:_password"`
+	Token    string `json:"_token,omitempty" gorm:"-"`
 }
 
 func (user *User) Validate() (map[string]interface{}, bool) {
@@ -40,7 +42,7 @@ func (user *User) Validate() (map[string]interface{}, bool) {
 		}
 	}
 	userTemp := &User{}
-	err := getDB().Where("email = ?", user.Email).First(&userTemp).Error
+	err := GetDB().Where("email = ?", user.Email).First(&userTemp).Error
 	if err != nil && err != gorm.ErrRecordNotFound {
 		return nil, false
 	}
@@ -48,7 +50,7 @@ func (user *User) Validate() (map[string]interface{}, bool) {
 		msg := "Email address already in use by another user."
 		x, y := errors["email"]
 		if !y {
-			errors["email"] = []string{}
+			errors["email"] = []string{msg}
 		} else {
 			errors["email"] = append(x, msg)
 		}
@@ -57,4 +59,20 @@ func (user *User) Validate() (map[string]interface{}, bool) {
 		return map[string]interface{}{"errors": errors}, false
 	}
 	return nil, true
+}
+
+func (user *User) Save(out *User) (uint, bool) {
+	isNew := GetDB().NewRecord(user)
+	if user.Password != "" {
+		hashPassword, _ := h.Encrypt(user.Password)
+		user.Password = hashPassword
+	}
+	if isNew {
+		GetDB().Create(&user)
+		user.Password = ""
+	} else {
+		GetDB().Save(&user)
+		user.Password = ""
+	}
+	return user.ID, isNew
 }

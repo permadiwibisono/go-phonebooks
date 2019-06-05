@@ -9,7 +9,7 @@ func Message(status int, msg string) map[string]interface{} {
 	return map[string]interface{}{"status_code": status, "message": msg}
 }
 
-func MessageWithData(status int, msg string, data map[string]interface{}) map[string]interface{} {
+func MessageWithData(status int, msg string, data interface{}) map[string]interface{} {
 	return map[string]interface{}{"status_code": status, "message": msg, "data": data}
 }
 

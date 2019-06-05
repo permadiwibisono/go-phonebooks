@@ -34,6 +34,6 @@ func init() {
 	db.Debug().AutoMigrate(&User{}, &Contact{}) //Database migration
 }
 
-func getDB() *gorm.DB {
+func GetDB() *gorm.DB {
 	return db
 }
