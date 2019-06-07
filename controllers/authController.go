@@ -34,7 +34,14 @@ type RegisterRequest struct {
 }
 
 func (self *Controller) Profile(w http.ResponseWriter, r *http.Request) {
-
+	userID := r.Context().Value("user").(uint)
+	user := &models.User{}
+	err := models.GetDB().Model(&models.User{}).Find(&user, userID).Error
+	if err != nil {
+		u.RespondError(w, http.StatusBadRequest, "Bad Request!", nil)
+		return
+	}
+	u.Respond(w, 200, u.MessageWithData(200, "Succeeded!", user))
 }
 
 func (self *Controller) Login(w http.ResponseWriter, r *http.Request) {

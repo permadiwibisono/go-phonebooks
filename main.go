@@ -49,10 +49,12 @@ func registerRoute(r *mux.Router, ctrl *controllers.Controller, name string, han
 	myRoute := ctrl.PrefixURL
 	regex, _ := regexp.Compile("/$")
 	myRoute = regex.ReplaceAllString(myRoute, "")
-	fmt.Println(myRoute)
+	// fmt.Println(myRoute)
+	// fmt.Println(sRoute)
 	if sRoute.URL != "" {
 		myRoute = myRoute + sRoute.URL
 	}
+	fmt.Println(myRoute)
 	if !ok {
 		fmt.Println("Cannot find index['" + name + "']")
 		return
@@ -68,7 +70,7 @@ func registerRoute(r *mux.Router, ctrl *controllers.Controller, name string, han
 			}
 		}
 		if len(enabledMiddlewares) > 0 {
-			fmt.Println(enabledMiddlewares)
+			// fmt.Println(enabledMiddlewares)
 			midFuncs = recursiveMiddleware(midFuncs, enabledMiddlewares, 0, handlerFunc)
 		}
 		if midFuncs != nil {
@@ -92,6 +94,7 @@ func main() {
 	apiRoute := router.PathPrefix("/api").Subrouter()
 	registerRoute(apiRoute, controllers.HomeController, "Index", controllers.HomeController.Index)
 	registerRoute(apiRoute, controllers.HomeController, "Index2", controllers.HomeController.Index2)
+	registerRoute(apiRoute, controllers.AuthController, "Profile", controllers.HomeController.Profile)
 	registerRoute(apiRoute, controllers.AuthController, "Register", controllers.HomeController.Register)
 	// router.HandleFunc("/api", controllers.HomeController.Index).
 	// 	Methods("GET")
