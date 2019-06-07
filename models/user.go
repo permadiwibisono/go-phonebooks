@@ -17,11 +17,11 @@ type Token struct {
 
 type User struct {
 	PrimaryKey
-	FullName string `json:"full_name" gorm:"null;size:80"`
-	Email    string `json:"email"`
-	Password string `json:"-" gorm:"column:_password"`
-	Token    string `json:"_token,omitempty" gorm:"-"`
-	Contacts []Contact
+	FullName string    `json:"full_name" gorm:"null;size:80"`
+	Email    string    `json:"email"`
+	Password string    `json:"-" gorm:"column:_password"`
+	Token    string    `json:"_token,omitempty" gorm:"-"`
+	Contacts []Contact `json:"contacts" gorm:"ForeignKey:UserID"`
 	Timestamps
 }
 
