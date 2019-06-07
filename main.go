@@ -92,6 +92,7 @@ func main() {
 	apiRoute := router.PathPrefix("/api").Subrouter()
 	registerRoute(apiRoute, controllers.HomeController, "Index", controllers.HomeController.Index)
 	registerRoute(apiRoute, controllers.HomeController, "Index2", controllers.HomeController.Index2)
+	registerRoute(apiRoute, controllers.AuthController, "Register", controllers.HomeController.Register)
 	// router.HandleFunc("/api", controllers.HomeController.Index).
 	// 	Methods("GET")
 	// router.Use(middlewares.JwtAuthMiddleware)

@@ -62,7 +62,7 @@ func (user *User) Validate() (map[string]interface{}, bool) {
 	return nil, true
 }
 
-func (user *User) Save(out *User) (uint, bool) {
+func (user *User) Save() (uint, bool) {
 	isNew := GetDB().NewRecord(user)
 	if user.Password != "" {
 		hashPassword, _ := h.Encrypt(user.Password)
