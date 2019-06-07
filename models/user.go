@@ -1,6 +1,7 @@
 package models
 
 import (
+	"os"
 	"strings"
 
 	h "go-phonebooks/utils/hash"
@@ -75,4 +76,11 @@ func (user *User) Save(out *User) (uint, bool) {
 		user.Password = ""
 	}
 	return user.ID, isNew
+}
+
+func (user *User) GenerateToken() {
+	tk := &Token{UserID: user.ID}
+	token := jwt.NewWithClaims(jwt.GetSigningMethod("HS256"), tk)
+	tokenString, _ := token.SignedString([]byte(os.Getenv("jwt_token")))
+	user.Token = tokenString
 }
