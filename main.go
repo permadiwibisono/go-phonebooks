@@ -5,98 +5,21 @@ import (
 	"net/http"
 	"os"
 
-	"go-phonebooks/controllers"
-	"go-phonebooks/middlewares"
-	_ "go-phonebooks/utils/env"
-
-	"regexp"
-
-	"github.com/gorilla/mux"
+	"go-phonebooks/bootstrap"
 )
 
-func setMiddleware(middlewareName string, handlerFunc http.HandlerFunc) http.Handler {
-	if middlewareName == "jwt" {
-		return middlewares.JwtAuthMiddleware(handlerFunc)
-	} else if middlewareName == "hello" {
-		return middlewares.HelloMiddleware(handlerFunc)
-	}
-	return nil
-}
-
-func appendMiddleware(middlewareName string, otherMiddlewares http.Handler) http.Handler {
-	if middlewareName == "jwt" {
-		return middlewares.JwtAuthMiddleware(otherMiddlewares)
-	} else if middlewareName == "hello" {
-		return middlewares.HelloMiddleware(otherMiddlewares)
-	}
-	return otherMiddlewares
-}
-
-func recursiveMiddleware(myMiddleware http.Handler, middlewareArr []string, start int, handler http.HandlerFunc) http.Handler {
-	if start < len(middlewareArr) {
-		if myMiddleware == nil {
-			myMiddleware = setMiddleware(middlewareArr[start], handler)
-		} else {
-			myMiddleware = appendMiddleware(middlewareArr[start], myMiddleware)
-		}
-		return recursiveMiddleware(myMiddleware, middlewareArr, start+1, handler)
-	}
-	return myMiddleware
-}
-
-func registerRoute(r *mux.Router, ctrl controllers.IController, name string, handler func(w http.ResponseWriter, r *http.Request)) {
-	sRoute, ok := ctrl.GetRoutes()[name]
-	myRoute := ctrl.GetPrefixUrl()
-	regex, _ := regexp.Compile("/$")
-	myRoute = regex.ReplaceAllString(myRoute, "")
-	// fmt.Println(myRoute)
-	// fmt.Println(sRoute)
-	if sRoute.URL != "" {
-		myRoute = myRoute + sRoute.URL
-	}
-	fmt.Println(myRoute)
-	if !ok {
-		fmt.Println("Cannot find index['" + name + "']")
-		return
-	}
-	mids, ok := ctrl.GetMiddlewares()[name]
-	if ok {
-		handlerFunc := http.HandlerFunc(handler)
-		enabledMiddlewares := []string{}
-		var midFuncs http.Handler
-		for _, value := range mids {
-			if value == "jwt" || value == "hello" {
-				enabledMiddlewares = append(enabledMiddlewares, value)
-			}
-		}
-		if len(enabledMiddlewares) > 0 {
-			// fmt.Println(enabledMiddlewares)
-			midFuncs = recursiveMiddleware(midFuncs, enabledMiddlewares, 0, handlerFunc)
-		}
-		if midFuncs != nil {
-			r.Handle(myRoute, midFuncs).
-				Methods(sRoute.Method).
-				Name(sRoute.Name)
-		} else {
-			r.HandleFunc(myRoute, handler).
-				Methods(sRoute.Method).
-				Name(sRoute.Name)
-		}
-	} else {
-		r.HandleFunc(myRoute, handler).
-			Methods(sRoute.Method).
-			Name(sRoute.Name)
-	}
-}
-
 func main() {
-	router := mux.NewRouter()
-	apiRoute := router.PathPrefix("/api").Subrouter()
-	registerRoute(apiRoute, controllers.HomeController, "Index", controllers.HomeController.Index)
-	registerRoute(apiRoute, controllers.HomeController, "Index2", controllers.HomeController.Index2)
-	registerRoute(apiRoute, controllers.AuthController, "Profile", controllers.AuthController.Profile)
-	registerRoute(apiRoute, controllers.AuthController, "Register", controllers.AuthController.Register)
-	registerRoute(apiRoute, controllers.AuthController, "Login", controllers.AuthController.Login)
+	app := &bootstrap.App{}
+	app.Initialize()
+	// router := mux.NewRouter()
+	// apiRoute := router.PathPrefix("/api").Subrouter()
+	// settingControllerRoutes(apiRoute, controllers.HomeController)
+	// settingControllerRoutes(apiRoute, controllers.AuthController)
+	// registerRoute(apiRoute, controllers.HomeController, "Index", controllers.HomeController.Index)
+	// registerRoute(apiRoute, controllers.HomeController, "Index2", controllers.HomeController.Index2)
+	// registerRoute(apiRoute, controllers.AuthController, "Profile", controllers.AuthController.Profile)
+	// registerRoute(apiRoute, controllers.AuthController, "Register", controllers.AuthController.Register)
+	// registerRoute(apiRoute, controllers.AuthController, "Login", controllers.AuthController.Login)
 	// router.HandleFunc("/api", controllers.HomeController.Index).
 	// 	Methods("GET")
 	// router.Use(middlewares.JwtAuthMiddleware)
@@ -107,7 +30,7 @@ func main() {
 
 	fmt.Println("Your port: " + port)
 
-	err := http.ListenAndServe(":"+port, router) //Launch the app, visit localhost:5000/api
+	err := http.ListenAndServe(":"+port, app.Router) //Launch the app, visit localhost:5000/api
 	if err != nil {
 		fmt.Print(err)
 	}

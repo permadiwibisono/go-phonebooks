@@ -7,6 +7,8 @@ import (
 	h "go-phonebooks/utils/hash"
 	"net/http"
 	"strings"
+
+	"github.com/jinzhu/gorm"
 )
 
 type AuthControllerType struct {
@@ -29,9 +31,23 @@ var AuthController = &AuthControllerType{}
 func init() {
 	AuthController.PrefixURL = "/auth"
 	routes := map[string]Route{
-		"Profile":  Route{Method: http.MethodGet, Name: "Auth.Get.Profile"},
-		"Login":    Route{URL: "/login", Method: http.MethodPost, Name: "Auth.Post.Login"},
-		"Register": Route{URL: "/register", Method: http.MethodPost, Name: "Auth.Post.Register"},
+		"Profile": Route{
+			Method:  http.MethodGet,
+			Name:    "Auth.Get.Profile",
+			Handler: AuthController.Profile,
+		},
+		"Login": Route{
+			URL:     "/login",
+			Method:  http.MethodPost,
+			Name:    "Auth.Post.Login",
+			Handler: AuthController.Login,
+		},
+		"Register": Route{
+			URL:     "/register",
+			Method:  http.MethodPost,
+			Name:    "Auth.Post.Register",
+			Handler: AuthController.Register,
+		},
 	}
 	middlewares := map[string][]string{
 		"Profile": []string{"jwt"},
@@ -50,10 +66,10 @@ type RegisterRequest struct {
 	ConfirmPassword string `json:"confirm_password"`
 }
 
-func (self *AuthControllerType) Profile(w http.ResponseWriter, r *http.Request) {
+func (self *AuthControllerType) Profile(w http.ResponseWriter, r *http.Request, DB *gorm.DB) {
 	userID := r.Context().Value("user").(uint)
 	user := &models.User{}
-	err := models.GetDB().Model(&models.User{}).Find(&user, userID).Error
+	err := DB.Model(&models.User{}).Find(&user, userID).Error
 	if err != nil {
 		u.RespondError(w, http.StatusBadRequest, "Bad Request!", nil)
 		return
@@ -86,7 +102,7 @@ func validateLoginRequest(login *LoginRequest) (map[string]interface{}, bool) {
 	}
 	return nil, true
 }
-func (self *AuthControllerType) Login(w http.ResponseWriter, r *http.Request) {
+func (self *AuthControllerType) Login(w http.ResponseWriter, r *http.Request, DB *gorm.DB) {
 	login := &LoginRequest{}
 	err := json.NewDecoder(r.Body).Decode(login)
 	if err != nil {
@@ -153,7 +169,7 @@ func validateRegisterRequest(register *RegisterRequest) (map[string]interface{},
 	return nil, true
 }
 
-func (self *AuthControllerType) Register(w http.ResponseWriter, r *http.Request) {
+func (self *AuthControllerType) Register(w http.ResponseWriter, r *http.Request, DB *gorm.DB) {
 	register := &RegisterRequest{}
 	err := json.NewDecoder(r.Body).Decode(register)
 	if err != nil {
