@@ -63,6 +63,7 @@ type LoginRequest struct {
 
 type RegisterRequest struct {
 	LoginRequest
+	FullName        string `json:"full_name"`
 	ConfirmPassword string `json:"confirm_password"`
 }
 
@@ -190,6 +191,7 @@ func (self *AuthControllerType) Register(w http.ResponseWriter, r *http.Request,
 		return
 	}
 	user := &models.User{
+		FullName: register.FullName,
 		Email:    register.Email,
 		Password: register.Password,
 	}

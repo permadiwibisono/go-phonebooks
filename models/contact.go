@@ -1,13 +1,11 @@
 package models
 
-import (
-	"github.com/jinzhu/gorm"
-)
-
 type Contact struct {
-	gorm.Model
-	UserID uint `json:"user_id"`
-	User   User
-	Name   string `json:"name"`
-	Phone  string `json:"phone"`
+	PrimaryKey
+	UserID       uint `json:"user_id"`
+	User         User
+	PhoneNumbers []PhoneNumber
+	Name         string `json:"name"`
+	IsFavorited  bool   `json:"is_favorited"`
+	Timestamps
 }
