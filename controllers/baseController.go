@@ -5,10 +5,18 @@ import (
 	"net/http"
 )
 
+type IController interface {
+	GetPrefixUrl() string
+	GetRoutes() map[string]Route
+	GetMiddlewares() map[string][]string
+}
 type Controller struct {
 	PrefixURL   string
 	Routes      map[string]Route
 	Middlewares map[string][]string
+}
+type HomeControllerType struct {
+	Controller
 }
 
 type Route struct {
@@ -17,9 +25,21 @@ type Route struct {
 	Name   string
 }
 
-var HomeController = &Controller{PrefixURL: "/"}
+func (i *HomeControllerType) GetPrefixUrl() string {
+	return i.PrefixURL
+}
+
+func (i *HomeControllerType) GetRoutes() map[string]Route {
+	return i.Routes
+}
+func (i *HomeControllerType) GetMiddlewares() map[string][]string {
+	return i.Middlewares
+}
+
+var HomeController = &HomeControllerType{}
 
 func init() {
+	HomeController.PrefixURL = "/"
 	routes := map[string]Route{
 		"Index":  Route{URL: "", Method: http.MethodGet, Name: "Home.Get.Index"},
 		"Index2": Route{URL: "/home", Method: http.MethodPost, Name: "Home.Post.Index2"},
@@ -28,11 +48,11 @@ func init() {
 	HomeController.Middlewares = mids
 	HomeController.Routes = routes
 }
-func (self *Controller) Index(w http.ResponseWriter, r *http.Request) {
+func (self *HomeControllerType) Index(w http.ResponseWriter, r *http.Request) {
 	msg := "Hello world!!!"
 	res.Respond(w, 200, res.Message(200, msg))
 }
-func (self *Controller) Index2(w http.ResponseWriter, r *http.Request) {
+func (self *HomeControllerType) Index2(w http.ResponseWriter, r *http.Request) {
 	msg := "Hello world!!! (w/o middlewares)"
 	res.Respond(w, 200, res.Message(200, msg))
 }

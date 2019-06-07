@@ -9,9 +9,25 @@ import (
 	"strings"
 )
 
-var AuthController = &Controller{PrefixURL: "/auth"}
+type AuthControllerType struct {
+	Controller
+}
+
+func (i *AuthControllerType) GetPrefixUrl() string {
+	return i.PrefixURL
+}
+
+func (i *AuthControllerType) GetRoutes() map[string]Route {
+	return i.Routes
+}
+func (i *AuthControllerType) GetMiddlewares() map[string][]string {
+	return i.Middlewares
+}
+
+var AuthController = &AuthControllerType{}
 
 func init() {
+	AuthController.PrefixURL = "/auth"
 	routes := map[string]Route{
 		"Profile":  Route{Method: http.MethodGet, Name: "Auth.Get.Profile"},
 		"Login":    Route{URL: "/login", Method: http.MethodPost, Name: "Auth.Post.Login"},
@@ -34,7 +50,7 @@ type RegisterRequest struct {
 	ConfirmPassword string `json:"confirm_password"`
 }
 
-func (self *Controller) Profile(w http.ResponseWriter, r *http.Request) {
+func (self *AuthControllerType) Profile(w http.ResponseWriter, r *http.Request) {
 	userID := r.Context().Value("user").(uint)
 	user := &models.User{}
 	err := models.GetDB().Model(&models.User{}).Find(&user, userID).Error
@@ -70,8 +86,7 @@ func validateLoginRequest(login *LoginRequest) (map[string]interface{}, bool) {
 	}
 	return nil, true
 }
-
-func (self *Controller) Login(w http.ResponseWriter, r *http.Request) {
+func (self *AuthControllerType) Login(w http.ResponseWriter, r *http.Request) {
 	login := &LoginRequest{}
 	err := json.NewDecoder(r.Body).Decode(login)
 	if err != nil {
@@ -138,7 +153,7 @@ func validateRegisterRequest(register *RegisterRequest) (map[string]interface{},
 	return nil, true
 }
 
-func (self *Controller) Register(w http.ResponseWriter, r *http.Request) {
+func (self *AuthControllerType) Register(w http.ResponseWriter, r *http.Request) {
 	register := &RegisterRequest{}
 	err := json.NewDecoder(r.Body).Decode(register)
 	if err != nil {

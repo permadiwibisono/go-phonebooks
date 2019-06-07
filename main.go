@@ -44,9 +44,9 @@ func recursiveMiddleware(myMiddleware http.Handler, middlewareArr []string, star
 	return myMiddleware
 }
 
-func registerRoute(r *mux.Router, ctrl *controllers.Controller, name string, handler func(w http.ResponseWriter, r *http.Request)) {
-	sRoute, ok := ctrl.Routes[name]
-	myRoute := ctrl.PrefixURL
+func registerRoute(r *mux.Router, ctrl controllers.IController, name string, handler func(w http.ResponseWriter, r *http.Request)) {
+	sRoute, ok := ctrl.GetRoutes()[name]
+	myRoute := ctrl.GetPrefixUrl()
 	regex, _ := regexp.Compile("/$")
 	myRoute = regex.ReplaceAllString(myRoute, "")
 	// fmt.Println(myRoute)
@@ -59,7 +59,7 @@ func registerRoute(r *mux.Router, ctrl *controllers.Controller, name string, han
 		fmt.Println("Cannot find index['" + name + "']")
 		return
 	}
-	mids, ok := ctrl.Middlewares[name]
+	mids, ok := ctrl.GetMiddlewares()[name]
 	if ok {
 		handlerFunc := http.HandlerFunc(handler)
 		enabledMiddlewares := []string{}
@@ -94,9 +94,9 @@ func main() {
 	apiRoute := router.PathPrefix("/api").Subrouter()
 	registerRoute(apiRoute, controllers.HomeController, "Index", controllers.HomeController.Index)
 	registerRoute(apiRoute, controllers.HomeController, "Index2", controllers.HomeController.Index2)
-	registerRoute(apiRoute, controllers.AuthController, "Profile", controllers.HomeController.Profile)
-	registerRoute(apiRoute, controllers.AuthController, "Register", controllers.HomeController.Register)
-	registerRoute(apiRoute, controllers.AuthController, "Login", controllers.HomeController.Login)
+	registerRoute(apiRoute, controllers.AuthController, "Profile", controllers.AuthController.Profile)
+	registerRoute(apiRoute, controllers.AuthController, "Register", controllers.AuthController.Register)
+	registerRoute(apiRoute, controllers.AuthController, "Login", controllers.AuthController.Login)
 	// router.HandleFunc("/api", controllers.HomeController.Index).
 	// 	Methods("GET")
 	// router.Use(middlewares.JwtAuthMiddleware)
