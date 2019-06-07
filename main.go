@@ -96,6 +96,7 @@ func main() {
 	registerRoute(apiRoute, controllers.HomeController, "Index2", controllers.HomeController.Index2)
 	registerRoute(apiRoute, controllers.AuthController, "Profile", controllers.HomeController.Profile)
 	registerRoute(apiRoute, controllers.AuthController, "Register", controllers.HomeController.Register)
+	registerRoute(apiRoute, controllers.AuthController, "Login", controllers.HomeController.Login)
 	// router.HandleFunc("/api", controllers.HomeController.Index).
 	// 	Methods("GET")
 	// router.Use(middlewares.JwtAuthMiddleware)
