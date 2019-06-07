@@ -18,13 +18,14 @@ cp .env.example .env
 ```
 ### Fill the variables with your environment
 ```
-db_name = go_phonebooks
-db_pass =
-db_user = root
-db_type = mysql
-db_host = localhost
-db_port = 3306
-jwt_token =
+DB_NAME = go_phonebooks
+DB_PASSWORD =
+DB_USERNAME = root
+DB_DIALECT = mysql
+DB_HOST = localhost
+DB_PORT = 3306
+DB_CHARSET = utf8
+JWT_TOKEN =
 PORT = 5000
 ```
 

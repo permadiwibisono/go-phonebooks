@@ -81,6 +81,6 @@ func (user *User) Save() (uint, bool) {
 func (user *User) GenerateToken() {
 	tk := &Token{UserID: user.ID}
 	token := jwt.NewWithClaims(jwt.GetSigningMethod("HS256"), tk)
-	tokenString, _ := token.SignedString([]byte(os.Getenv("jwt_token")))
+	tokenString, _ := token.SignedString([]byte(os.Getenv("JWT_TOKEN")))
 	user.Token = tokenString
 }

@@ -2,7 +2,6 @@ package middlewares
 
 import (
 	"go-phonebooks/models"
-	_ "go-phonebooks/models"
 	"net/http"
 	"os"
 
@@ -33,7 +32,7 @@ var JwtAuthMiddleware = func(next http.Handler) http.Handler {
 		tokenPart := tokenSplitted[len(tokenSplitted)-1]
 		tk := &models.Token{}
 		token, err := jwt.ParseWithClaims(tokenPart, tk, func(token *jwt.Token) (interface{}, error) {
-			return []byte(os.Getenv("jwt_token")), nil
+			return []byte(os.Getenv("JWT_TOKEN")), nil
 		})
 
 		if err != nil {

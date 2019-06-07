@@ -25,13 +25,13 @@ var config *Config
 func init() {
 	config = &Config{
 		DB: &DBConfig{
-			Dialect:  os.Getenv("db_type"),
-			Name:     os.Getenv("db_name"),
-			Port:     os.Getenv("db_port"),
-			Username: os.Getenv("db_user"),
-			Password: os.Getenv("db_password"),
-			Host:     os.Getenv("db_host"),
-			Charset:  "utf8",
+			Dialect:  os.Getenv("DB_DIALECT"),
+			Name:     os.Getenv("DB_NAME"),
+			Port:     os.Getenv("DB_PORT"),
+			Username: os.Getenv("DB_USERNAME"),
+			Password: os.Getenv("DB_PASSWORD"),
+			Host:     os.Getenv("DB_HOST"),
+			Charset:  os.Getenv("DB_CHARSET"),
 			Loc:      "Local",
 		},
 	}
