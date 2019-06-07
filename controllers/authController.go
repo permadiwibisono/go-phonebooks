@@ -71,6 +71,10 @@ func (self *AuthControllerType) Profile(w http.ResponseWriter, r *http.Request, 
 	user := &models.User{}
 	err := DB.Model(&models.User{}).Find(&user, userID).Error
 	if err != nil {
+		if err == gorm.ErrRecordNotFound {
+			u.RespondError(w, http.StatusBadRequest, "User record not found!", nil)
+			return
+		}
 		u.RespondError(w, http.StatusBadRequest, "Bad Request!", nil)
 		return
 	}
@@ -119,6 +123,10 @@ func (self *AuthControllerType) Login(w http.ResponseWriter, r *http.Request, DB
 		Where("email = ?", login.Email).
 		First(&user).Error
 	if errFindModel != nil {
+		if errFindModel == gorm.ErrRecordNotFound {
+			u.RespondError(w, http.StatusBadRequest, "Your credentials not found", nil)
+			return
+		}
 		u.RespondError(w, http.StatusBadRequest, "Invalid credentials!", nil)
 		return
 	}
