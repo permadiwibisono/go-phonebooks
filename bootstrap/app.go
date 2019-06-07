@@ -6,11 +6,11 @@ import (
 	"go-phonebooks/controllers"
 	"go-phonebooks/middlewares"
 	"go-phonebooks/models"
-	_ "go-phonebooks/utils/env"
 	"net/http"
 	"regexp"
 
 	"github.com/gorilla/mux"
+	"github.com/joho/godotenv"
 
 	"github.com/jinzhu/gorm"
 	_ "github.com/jinzhu/gorm/dialects/mysql"
@@ -21,7 +21,7 @@ type App struct {
 	Router *mux.Router
 }
 
-func dbConnect(config *config.DBConfig) *gorm.DB {
+func (app *App) dbConnect(config *config.DBConfig) *gorm.DB {
 	dbURI := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?charset=%s&parseTime=True&loc=%s",
 		config.Username,
 		config.Password,
@@ -42,9 +42,18 @@ func dbConnect(config *config.DBConfig) *gorm.DB {
 	return conn
 }
 
+func (app *App) EnvLoad() {
+	fmt.Println("Load environment variables...")
+	e := godotenv.Load()
+	if e != nil {
+		fmt.Print(e)
+	}
+}
+
 func (app *App) Initialize() {
+	app.EnvLoad()
 	config := config.GetConfig()
-	db := dbConnect(config.DB)
+	db := app.dbConnect(config.DB)
 	app.DB = models.AutoMigrate(db)
 	app.Router = mux.NewRouter()
 	app.setRouters()
@@ -56,14 +65,15 @@ func (app *App) setRouters() {
 }
 
 func (app *App) RegisterControllerRouters(ctrl controllers.IController) {
-	apiRouter := app.Router.PathPrefix("/api").Subrouter()
+	entryPoint := "/api"
+	apiRouter := app.Router.PathPrefix(entryPoint).Subrouter()
 	routeList := ctrl.GetRoutes()
 	for key, r := range routeList {
 		regex, _ := regexp.Compile("/$")
-		prefixUrl := ctrl.GetPrefixUrl()
-		prefixUrl = regex.ReplaceAllString(prefixUrl, "")
-		path := prefixUrl + r.URL
-		fmt.Println("PATH: " + path)
+		prefixURL := ctrl.GetPrefixUrl()
+		prefixURL = regex.ReplaceAllString(prefixURL, "")
+		path := prefixURL + r.URL
+		fmt.Printf("PATH: %s%s\n", entryPoint, path)
 		middlewaresArray := ctrl.GetMiddlewares()[key]
 		app.SetRoute(apiRouter, &r, path, middlewaresArray)
 	}

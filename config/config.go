@@ -1,7 +1,6 @@
 package config
 
 import (
-	_ "go-phonebooks/utils/env"
 	"os"
 )
 
@@ -20,10 +19,8 @@ type Config struct {
 	DB *DBConfig
 }
 
-var config *Config
-
-func init() {
-	config = &Config{
+func GetConfig() *Config {
+	return &Config{
 		DB: &DBConfig{
 			Dialect:  os.Getenv("DB_DIALECT"),
 			Name:     os.Getenv("DB_NAME"),
@@ -35,8 +32,4 @@ func init() {
 			Loc:      "Local",
 		},
 	}
-}
-
-func GetConfig() *Config {
-	return config
 }
