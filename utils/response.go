@@ -20,7 +20,11 @@ func Respond(w http.ResponseWriter, statusCode int, data map[string]interface{})
 }
 
 func RespondError(w http.ResponseWriter, statusCode int, msg string, errData map[string]interface{}) {
+	if errData == nil {
+		errData = make(map[string]interface{})
+	}
 	errData["status_code"] = statusCode
 	errData["message"] = msg
-	Respond(w, statusCode, errData)
+	errorWrapper := map[string]interface{}{"error": errData}
+	Respond(w, statusCode, errorWrapper)
 }
