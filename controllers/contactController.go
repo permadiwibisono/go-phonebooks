@@ -1,6 +1,8 @@
 package controllers
 
 import (
+	"fmt"
+	"go-phonebooks/middlewares"
 	"go-phonebooks/models"
 	u "go-phonebooks/utils"
 	"net/http"
@@ -44,6 +46,9 @@ func init() {
 
 func (self *ContactControllerType) Index(w http.ResponseWriter, r *http.Request, DB *gorm.DB) {
 	userID := r.Context().Value("user").(uint)
+
+	pagination := r.Context().Value("pagination").(middlewares.PaginationQuery)
+	fmt.Printf("Your pagination: Page %d, PerPage %d\n", pagination.Page, pagination.PerPage)
 	contacts := &[]models.Contact{}
 	queries := map[string]interface{}{"user_id": userID}
 	err := DB.Model(&models.Contact{}).

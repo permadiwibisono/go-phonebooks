@@ -64,6 +64,7 @@ func (app *App) setRouters() {
 	app.RegisterControllerRouters(controllers.AuthController)
 	app.RegisterControllerRouters(controllers.ContactController)
 	app.Router.Use(middlewares.Logger)
+	app.Router.Use(middlewares.PaginationQueryParams)
 }
 
 func (app *App) RegisterControllerRouters(ctrl controllers.IController) {
