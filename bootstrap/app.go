@@ -62,6 +62,7 @@ func (app *App) Initialize() {
 func (app *App) setRouters() {
 	app.RegisterControllerRouters(controllers.HomeController)
 	app.RegisterControllerRouters(controllers.AuthController)
+	app.RegisterControllerRouters(controllers.ContactController)
 	app.Router.Use(middlewares.Logger)
 }
 
