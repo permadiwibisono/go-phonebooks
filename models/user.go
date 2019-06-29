@@ -21,7 +21,7 @@ type User struct {
 	Email    string    `json:"email"`
 	Password string    `json:"-" gorm:"column:_password"`
 	Token    string    `json:"_token,omitempty" gorm:"-"`
-	Contacts []Contact `json:"contacts" gorm:"ForeignKey:UserID"`
+	Contacts []Contact `json:"contacts,omitempty" gorm:"ForeignKey:UserID,PRELOAD:false"`
 	Timestamps
 }
 

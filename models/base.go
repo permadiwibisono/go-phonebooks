@@ -15,11 +15,12 @@ type PrimaryKey struct {
 type Timestamps struct {
 	CreatedAt time.Time  `json:"created_at"`
 	UpdatedAt time.Time  `json:"updated_at"`
-	DeletedAt *time.Time `json:"deleted_at" sql:"index"`
+	DeletedAt *time.Time `json:"-" sql:"index"`
 }
 
 func AutoMigrate(myDb *gorm.DB) *gorm.DB {
 	db = myDb
+	myDb.LogMode(true)
 	myDb.SingularTable(true)
 	myDb.Debug().AutoMigrate(&User{}, &Contact{}, &PhoneNumber{})
 	myDb.Debug().Model(&Contact{}).AddForeignKey("user_id", "user(id)", "CASCADE", "CASCADE")
