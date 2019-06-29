@@ -5,11 +5,11 @@ Save your phonebooks with go as u go :) (In progress)
 
 ### Installing depedencies
 ```
-go get github/gorilla/mux
-go get github/jinzhu/gorm
+go get github.com/gorilla/mux
+go get github.com/jinzhu/gorm
 go get github.com/go-sql-driver/mysql
-go get github/dgrijalva/jwt-go
-go get github/joho/godotenv
+go get github.com/dgrijalva/jwt-go
+go get github.com/joho/godotenv
 ```
 
 ### First copy .env.example to .env file
