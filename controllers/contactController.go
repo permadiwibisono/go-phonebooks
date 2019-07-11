@@ -46,19 +46,25 @@ func init() {
 
 func (self *ContactControllerType) Index(w http.ResponseWriter, r *http.Request, DB *gorm.DB) {
 	userID := r.Context().Value("user").(uint)
-
-	pagination := r.Context().Value("pagination").(middlewares.PaginationQuery)
+	getPaginationQuery := r.Context().Value("pagination")
+	pagination := middlewares.PaginationQuery{
+		Page:    1,
+		PerPage: 16,
+	}
+	if getPaginationQuery != nil {
+		pagination = getPaginationQuery.(middlewares.PaginationQuery)
+	}
 	fmt.Printf("Your pagination: Page %d, PerPage %d\n", pagination.Page, pagination.PerPage)
 	contacts := &[]models.Contact{}
 	queries := map[string]interface{}{"user_id": userID}
-	err := DB.Model(&models.Contact{}).
+	dbQueries := DB.Model(&models.Contact{}).
 		Preload("User").
 		Where(queries).
-		Order("is_favorited desc").
-		Find(&contacts).Error
+		Order("is_favorited desc")
+	data, err := models.Paginate(dbQueries, contacts, pagination.Page, pagination.PerPage)
 	if err != nil {
 		u.RespondError(w, http.StatusBadRequest, err.Error(), nil)
 		return
 	}
-	u.Respond(w, 200, u.MessageWithData(200, "Succeeded!", contacts))
+	u.Respond(w, 200, u.MessageWithData(200, "Get contact list.", data))
 }
