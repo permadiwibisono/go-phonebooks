@@ -18,8 +18,12 @@ var PaginationQueryParams = func(next http.Handler) http.Handler {
 		if r.Method == http.MethodGet {
 			queries := r.URL.Query()
 			if len(queries) > 0 {
-				var perPage int64 = 16
-				var page int64 = 1
+				// var perPage int64 = 16
+				// var page int64 = 1
+				pagination := PaginationQuery{
+					Page:    1,
+					PerPage: 16,
+				}
 				modQueries := make(map[string][]string)
 
 				for key, item := range queries {
@@ -28,23 +32,24 @@ var PaginationQueryParams = func(next http.Handler) http.Handler {
 						modQueries[key] = item
 					}
 				}
-				if i, ok := queries["page"]; ok {
+				if i, ok := modQueries["page"]; ok {
 					p, err := strconv.ParseInt(i[0], 10, 64)
+					fmt.Printf("%d \n", p)
 					if err == nil {
-						perPage = p
+						pagination.Page = p
 					}
 				}
-				if i, ok := queries["per_page"]; ok {
+				if i, ok := modQueries["per_page"]; ok {
 					p, err := strconv.ParseInt(i[0], 10, 64)
+					fmt.Printf("%d \n", p)
 					if err == nil {
-						perPage = p
+						pagination.PerPage = p
 					}
 				}
-				ctx := context.WithValue(r.Context(), "pagination", PaginationQuery{Page: page, PerPage: perPage})
+				ctx := context.WithValue(r.Context(), "pagination", pagination)
 				r = r.WithContext(ctx)
 				fmt.Printf("[%s] %s %s\n", time.Now().Format(time.RFC822Z), "Your query params", queries)
 			}
-
 		}
 		next.ServeHTTP(w, r)
 	})
