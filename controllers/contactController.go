@@ -56,15 +56,18 @@ func (self *ContactControllerType) Index(w http.ResponseWriter, r *http.Request,
 	}
 	fmt.Printf("Your pagination: Page %d, PerPage %d\n", pagination.Page, pagination.PerPage)
 	contacts := &[]models.Contact{}
+	dataPagination := &models.Pagination{}
 	queries := map[string]interface{}{"user_id": userID}
-	dbQueries := DB.Model(&models.Contact{}).
+	err := DB.Model(&models.Contact{}).
 		Preload("User").
 		Where(queries).
-		Order("is_favorited desc")
-	data, err := models.Paginate(dbQueries, contacts, pagination.Page, pagination.PerPage)
+		Order("is_favorited desc").
+		Scopes(models.ScopePaginate(int(pagination.Page), int(pagination.PerPage), &models.Contact{}, dataPagination)).
+		Find(&contacts).Error
 	if err != nil {
 		u.RespondError(w, http.StatusBadRequest, err.Error(), nil)
 		return
 	}
-	u.Respond(w, 200, u.MessageWithData(200, "Get contact list.", data))
+	dataPagination.Data = contacts
+	u.Respond(w, 200, u.MessageWithData(200, "Get contact list.", dataPagination))
 }

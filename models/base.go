@@ -32,6 +32,8 @@ type Timestamps struct {
 	DeletedAt *time.Time `json:"-" sql:"index"`
 }
 
+type ScopeFunc func(db *gorm.DB) *gorm.DB
+
 func AutoMigrate(myDb *gorm.DB) *gorm.DB {
 	db = myDb
 	myDb.LogMode(true)
@@ -46,48 +48,38 @@ func GetDB() *gorm.DB {
 	return db
 }
 
-func Paginate(query *gorm.DB, out interface{}, page int64, perPage int64) (interface{}, error) {
-	offset := int((page - 1) * perPage)
-	pagination := Pagination{
-		CurrentPage: int(page),
-		PerPage:     int(perPage),
-		Data:        out,
-	}
-	query.Count(&pagination.Total)
-	if pagination.Total > 0 {
-		pagination.FirstPage = 1
-		if pagination.Total%pagination.PerPage > 0 && pagination.Total/pagination.PerPage > 0 {
-			pagination.LastPage = (pagination.Total / pagination.PerPage) + 1
-		} else if pagination.Total/pagination.PerPage > 1 {
-			pagination.LastPage = pagination.Total / pagination.PerPage
+func ScopePaginate(page int, perPage int, out interface{}, pagination *Pagination) ScopeFunc {
+	return func(db *gorm.DB) *gorm.DB {
+		offset := (page - 1) * perPage
+		pagination.CurrentPage = page
+		pagination.PerPage = perPage
+		clone := db.NewScope(out)
+		clone.DB().Count(&pagination.Total)
+		if pagination.Total > 0 {
+			pagination.FirstPage = 1
+			if pagination.Total%pagination.PerPage > 0 && pagination.Total/pagination.PerPage > 0 {
+				pagination.LastPage = (pagination.Total / pagination.PerPage) + 1
+			} else if pagination.Total/pagination.PerPage > 1 {
+				pagination.LastPage = pagination.Total / pagination.PerPage
+			}
+			if pagination.LastPage != nil {
+				pagination.TotalPage = pagination.LastPage.(int)
+			} else {
+				pagination.TotalPage = pagination.FirstPage.(int)
+			}
+			if pagination.CurrentPage != 1 && pagination.CurrentPage-1 >= 1 {
+				pagination.PrevPage = pagination.CurrentPage - 1
+			}
+			if pagination.CurrentPage+1 <= pagination.TotalPage {
+				pagination.NextPage = pagination.CurrentPage + 1
+			}
 		}
-		if pagination.LastPage != nil {
-			pagination.TotalPage = pagination.LastPage.(int)
-		} else {
-			pagination.TotalPage = pagination.FirstPage.(int)
+		var ids []uint
+		clone.DB().Pluck(clone.PrimaryField().Name, &ids)
+		if len(ids) > 0 {
+			pagination.From = offset + 1
+			pagination.To = offset + len(ids)
 		}
-		if pagination.CurrentPage != 1 && pagination.CurrentPage-1 >= 1 {
-			pagination.PrevPage = pagination.CurrentPage - 1
-		}
-		if pagination.CurrentPage+1 <= pagination.TotalPage {
-			pagination.NextPage = pagination.CurrentPage + 1
-		}
+		return db.Limit(perPage).Offset(offset)
 	}
-	err := query.
-		Limit(perPage).
-		Offset(offset).
-		Find(out).Error
-	if err != nil {
-		return nil, err
-	}
-	var ids []uint
-	query.
-		Limit(perPage).
-		Offset(offset).
-		Pluck("id", &ids)
-	if len(ids) > 0 {
-		pagination.From = offset + 1
-		pagination.To = offset + len(ids)
-	}
-	return pagination, err
 }
