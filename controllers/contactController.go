@@ -2,7 +2,6 @@ package controllers
 
 import (
 	"fmt"
-	"go-phonebooks/middlewares"
 	"go-phonebooks/models"
 	u "go-phonebooks/utils"
 	"net/http"
@@ -46,15 +45,8 @@ func init() {
 
 func (self *ContactControllerType) Index(w http.ResponseWriter, r *http.Request, DB *gorm.DB) {
 	userID := r.Context().Value("user").(uint)
-	getPaginationQuery := r.Context().Value("pagination")
-	pagination := middlewares.PaginationQuery{
-		Page:    1,
-		PerPage: 16,
-	}
-	if getPaginationQuery != nil {
-		pagination = getPaginationQuery.(middlewares.PaginationQuery)
-	}
-	fmt.Printf("Your pagination: Page %d, PerPage %d\n", pagination.Page, pagination.PerPage)
+	paginationQuery := u.GetPaginationQueryParams(r)
+	fmt.Printf("Your pagination: Page %d, PerPage %d\n", paginationQuery.Page, paginationQuery.PerPage)
 	contacts := &[]models.Contact{}
 	dataPagination := &models.Pagination{}
 	queries := map[string]interface{}{"user_id": userID}
@@ -62,7 +54,7 @@ func (self *ContactControllerType) Index(w http.ResponseWriter, r *http.Request,
 		Preload("User").
 		Where(queries).
 		Order("is_favorited desc").
-		Scopes(models.ScopePaginate(int(pagination.Page), int(pagination.PerPage), &models.Contact{}, dataPagination)).
+		Scopes(models.ScopePaginate(paginationQuery.Page, paginationQuery.PerPage, &models.Contact{}, dataPagination)).
 		Find(&contacts).Error
 	if err != nil {
 		u.RespondError(w, http.StatusBadRequest, err.Error(), nil)
