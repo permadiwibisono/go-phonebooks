@@ -67,7 +67,7 @@ func ScopePaginate(page int, perPage int, out interface{}, pagination *Paginatio
 			} else {
 				pagination.TotalPage = pagination.FirstPage.(int)
 			}
-			if pagination.CurrentPage != 1 && pagination.CurrentPage-1 >= 1 {
+			if pagination.CurrentPage != 1 && pagination.CurrentPage-1 >= 1 && pagination.CurrentPage-1 <= pagination.TotalPage {
 				pagination.PrevPage = pagination.CurrentPage - 1
 			}
 			if pagination.CurrentPage+1 <= pagination.TotalPage {
@@ -75,7 +75,10 @@ func ScopePaginate(page int, perPage int, out interface{}, pagination *Paginatio
 			}
 		}
 		var ids []uint
-		clone.DB().Pluck(clone.PrimaryField().Name, &ids)
+		clone.DB().
+			Limit(perPage).
+			Offset(offset).
+			Pluck(clone.PrimaryField().Name, &ids)
 		if len(ids) > 0 {
 			pagination.From = offset + 1
 			pagination.To = offset + len(ids)
